@@ -1,217 +1,242 @@
-import React, { useState, useEffect } from 'react';
-import { Search, Plus, Inbox, AlertTriangle, ChevronUp, ChevronDown } from 'lucide-react';
-import { getProducts } from '../services/api';
+import React, { useState, useMemo } from 'react';
+import { Search, ChevronUp, ChevronDown, Package, Plus, RefreshCw } from 'lucide-react';
 
-export default function ProductList({ onViewChange, onSelectProduct }) {
-  const [products, setProducts] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
+export default function ProductList({ products, loading, onSelectProduct, onOpenCreate, initialFilter = 'all', onRestockProduct, restockingId }) {
   const [searchTerm, setSearchTerm] = useState('');
+  const [stockFilter, setStockFilter] = useState(initialFilter);
   const [sortConfig, setSortConfig] = useState({ key: 'id', direction: 'asc' });
 
-  useEffect(() => {
-    async function loadProducts() {
-      try {
-        setLoading(true);
-        setError(null);
-        const data = await getProducts();
-        setProducts(data);
-      } catch (err) {
-        console.error('Failed to fetch products:', err);
-        setError('Failed to fetch products. Please check if backend is online.');
-      } finally {
-        setLoading(false);
-      }
+  React.useEffect(() => {
+    if (initialFilter) {
+      setStockFilter(initialFilter);
     }
-
-    loadProducts();
-  }, []);
-
-  const handleRowClick = (productId) => {
-    onSelectProduct(productId);
-    onViewChange('product-detail');
-  };
+  }, [initialFilter]);
 
   const handleSort = (key) => {
-    let direction = 'asc';
-    if (sortConfig.key === key && sortConfig.direction === 'asc') {
-      direction = 'desc';
-    }
-    setSortConfig({ key, direction });
+    setSortConfig((prev) => ({
+      key,
+      direction: prev.key === key && prev.direction === 'asc' ? 'desc' : 'asc',
+    }));
   };
 
-  const filteredProducts = products.filter(product => {
-    const term = searchTerm.toLowerCase();
-    return (
-      product.name.toLowerCase().includes(term) ||
-      (product.description && product.description.toLowerCase().includes(term)) ||
-      product.id.toString().includes(term)
-    );
-  });
+  const filteredProducts = useMemo(() => {
+    return products.filter((product) => {
+      // Stock filter
+      if (stockFilter === 'out' && product.quantity !== 0) return false;
+      if (stockFilter === 'low' && (product.quantity === 0 || product.quantity > 10)) return false;
 
-  // Sort the filtered products list
-  const sortedProducts = [...filteredProducts].sort((a, b) => {
-    if (sortConfig.key === 'id') {
-      return sortConfig.direction === 'asc' ? a.id - b.id : b.id - a.id;
-    }
-    if (sortConfig.key === 'price') {
-      return sortConfig.direction === 'asc' ? a.price - b.price : b.price - a.price;
-    }
-    if (sortConfig.key === 'quantity') {
-      // Sorts by numerical quantity (represents stock status)
-      return sortConfig.direction === 'asc' ? a.quantity - b.quantity : b.quantity - a.quantity;
-    }
-    return 0;
-  });
+      // Text search
+      if (!searchTerm.trim()) return true;
+      const term = searchTerm.toLowerCase();
+      return (
+        product.name.toLowerCase().includes(term) ||
+        (product.description && product.description.toLowerCase().includes(term)) ||
+        product.id.toString().includes(term)
+      );
+    });
+  }, [products, searchTerm, stockFilter]);
 
-  const getStockBadge = (quantity) => {
-    if (quantity === 0) {
-      return <span className="badge badge-danger">Out of stock</span>;
-    }
-    if (quantity <= 10) {
-      return <span className="badge badge-warning">Low stock ({quantity})</span>;
-    }
-    return <span className="badge badge-success">In stock ({quantity})</span>;
-  };
+  const sortedProducts = useMemo(() => {
+    return [...filteredProducts].sort((a, b) => {
+      const dir = sortConfig.direction === 'asc' ? 1 : -1;
+      if (sortConfig.key === 'id') return (a.id - b.id) * dir;
+      if (sortConfig.key === 'name') return a.name.localeCompare(b.name) * dir;
+      if (sortConfig.key === 'price') return (a.price - b.price) * dir;
+      if (sortConfig.key === 'quantity') return (a.quantity - b.quantity) * dir;
+      return 0;
+    });
+  }, [filteredProducts, sortConfig]);
 
   const renderSortIcon = (key) => {
     if (sortConfig.key !== key) {
-      return <ChevronDown size={14} style={{ opacity: 0.3, marginLeft: '0.25rem' }} />;
+      return <ChevronDown size={12} style={{ opacity: 0.25, marginLeft: '0.25rem' }} />;
     }
-    return sortConfig.direction === 'asc' 
-      ? <ChevronUp size={14} style={{ color: 'var(--primary)', marginLeft: '0.25rem' }} />
-      : <ChevronDown size={14} style={{ color: 'var(--primary)', marginLeft: '0.25rem' }} />;
+    return sortConfig.direction === 'asc' ? (
+      <ChevronUp size={12} style={{ color: 'var(--text-primary)', marginLeft: '0.25rem' }} />
+    ) : (
+      <ChevronDown size={12} style={{ color: 'var(--text-primary)', marginLeft: '0.25rem' }} />
+    );
   };
 
-  if (loading) {
+  const getStockBadge = (quantity) => {
+    if (quantity === 0) {
+      return (
+        <span className="badge badge-danger tabular-nums">
+          <span className="badge-dot"></span> Out of stock
+        </span>
+      );
+    }
+    if (quantity <= 10) {
+      return (
+        <span className="badge badge-warning tabular-nums">
+          <span className="badge-dot"></span> {quantity} left
+        </span>
+      );
+    }
     return (
-      <div className="loading-container">
+      <span className="badge badge-success tabular-nums">
+        <span className="badge-dot"></span> {quantity} in stock
+      </span>
+    );
+  };
+
+  if (loading && products.length === 0) {
+    return (
+      <div className="state-container">
         <div className="spinner"></div>
-        <p>Loading inventory items...</p>
+        <p className="state-subtitle">Loading products...</p>
       </div>
     );
   }
+
+  const lowStockCount = products.filter((p) => p.quantity > 0 && p.quantity <= 10).length;
+  const outOfStockCount = products.filter((p) => p.quantity === 0).length;
 
   return (
     <div>
       <div className="page-header">
         <div>
           <h1 className="page-title">Inventory</h1>
-          <p className="page-subtitle">Search and manage products in stock.</p>
+          <p className="page-subtitle">Manage products, pricing, and stock</p>
         </div>
-        {/* Minimalist icon-only Plus button */}
-        <button 
-          className="btn btn-primary" 
-          onClick={() => onViewChange('create-product')}
-          style={{ padding: '0.625rem', width: '2.5rem', height: '2.5rem' }}
-          title="Add Product"
-          aria-label="Add Product"
-        >
-          <Plus size={18} />
-        </button>
       </div>
 
-      {error && (
-        <div className="error-container">
-          <AlertTriangle className="error-icon" size={32} />
-          <h3>Error Loading Products</h3>
-          <p style={{ marginTop: '0.5rem' }}>{error}</p>
-        </div>
-      )}
-
-      {!error && (
-        <div className="glass-card" style={{ padding: '1.25rem' }}>
-          <div className="filter-bar">
-            <div className="search-wrapper">
-              <Search className="search-icon" size={18} />
-              <input
-                type="text"
-                className="search-input"
-                placeholder="Search by ID, name or description..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-              />
-            </div>
+      <div className="card">
+        <div className="filter-toolbar">
+          <div className="search-container">
+            <Search className="search-icon" size={15} />
+            <input
+              type="text"
+              className="search-field"
+              placeholder="Search products..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+            />
           </div>
 
-          {sortedProducts.length === 0 ? (
-            <div className="empty-container">
-              <Inbox size={48} style={{ color: 'var(--text-muted)', marginBottom: '1rem' }} />
-              <h3>No products found</h3>
-              <p style={{ color: 'var(--text-secondary)', marginTop: '0.25rem' }}>
-                {products.length === 0 
-                  ? "Get started by adding your first product to the database!" 
-                  : "No products matched your search."}
-              </p>
-              {products.length === 0 && (
-                <button 
-                  className="btn btn-primary" 
-                  style={{ marginTop: '1.5rem' }}
-                  onClick={() => onViewChange('create-product')}
-                >
-                  <Plus size={18} /> Add First Product
-                </button>
-              )}
-            </div>
-          ) : (
-            <div className="table-container">
-              <table className="premium-table">
-                <thead>
-                  <tr>
-                    <th 
-                      style={{ width: '100px', cursor: 'pointer', userSelect: 'none' }} 
-                      onClick={() => handleSort('id')}
-                    >
-                      <span style={{ display: 'inline-flex', alignItems: 'center' }}>
-                        ID {renderSortIcon('id')}
-                      </span>
-                    </th>
-                    <th>Product Name</th>
-                    <th 
-                      style={{ width: '140px', cursor: 'pointer', userSelect: 'none' }} 
-                      onClick={() => handleSort('price')}
-                    >
-                      <span style={{ display: 'inline-flex', alignItems: 'center' }}>
-                        Price {renderSortIcon('price')}
-                      </span>
-                    </th>
-                    <th 
-                      style={{ width: '200px', cursor: 'pointer', userSelect: 'none' }} 
-                      onClick={() => handleSort('quantity')}
-                    >
-                      <span style={{ display: 'inline-flex', alignItems: 'center' }}>
-                        Stock Status {renderSortIcon('quantity')}
-                      </span>
-                    </th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {sortedProducts.map((product) => (
-                    <tr 
-                      key={product.id} 
-                      onClick={() => handleRowClick(product.id)}
-                      style={{ cursor: 'pointer' }}
-                    >
-                      <td style={{ color: 'var(--primary)', fontWeight: 600 }}>#{product.id}</td>
-                      <td>
-                        <div className="product-row-name">{product.name}</div>
-                        <div className="product-row-description">{product.description || 'No description provided'}</div>
-                      </td>
-                      <td style={{ fontWeight: 500 }}>
-                        ${parseFloat(product.price).toFixed(2)}
-                      </td>
-                      <td>
-                        {getStockBadge(product.quantity)}
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          )}
+          <div className="filter-group">
+            <button
+              className={`filter-chip ${stockFilter === 'all' ? 'active' : ''}`}
+              onClick={() => setStockFilter('all')}
+            >
+              All ({products.length})
+            </button>
+            <button
+              className={`filter-chip ${stockFilter === 'low' ? 'active' : ''}`}
+              onClick={() => setStockFilter('low')}
+            >
+              Low Stock ({lowStockCount})
+            </button>
+            <button
+              className={`filter-chip ${stockFilter === 'out' ? 'active' : ''}`}
+              onClick={() => setStockFilter('out')}
+            >
+              Out of Stock ({outOfStockCount})
+            </button>
+          </div>
         </div>
-      )}
+
+        {sortedProducts.length === 0 ? (
+          <div className="state-container">
+            <Package size={28} style={{ color: 'var(--text-muted)' }} />
+            <p className="state-title">No products found</p>
+            <p className="state-subtitle">
+              {products.length === 0
+                ? 'No products added yet.'
+                : 'No products match your search.'}
+            </p>
+            {products.length === 0 && (
+              <button className="btn btn-primary btn-sm" style={{ marginTop: '0.75rem' }} onClick={onOpenCreate}>
+                <Plus size={14} /> Add Product
+              </button>
+            )}
+          </div>
+        ) : (
+          <div className="table-wrapper">
+            <table className="table">
+              <thead>
+                <tr>
+                  <th
+                    style={{ width: '80px', cursor: 'pointer', userSelect: 'none' }}
+                    onClick={() => handleSort('id')}
+                  >
+                    <span style={{ display: 'inline-flex', alignItems: 'center' }}>
+                      ID {renderSortIcon('id')}
+                    </span>
+                  </th>
+                  <th
+                    style={{ cursor: 'pointer', userSelect: 'none' }}
+                    onClick={() => handleSort('name')}
+                  >
+                    <span style={{ display: 'inline-flex', alignItems: 'center' }}>
+                      Name {renderSortIcon('name')}
+                    </span>
+                  </th>
+                  <th
+                    style={{ width: '120px', cursor: 'pointer', userSelect: 'none' }}
+                    className="text-right"
+                    onClick={() => handleSort('price')}
+                  >
+                    <span style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'flex-end', width: '100%' }}>
+                      Price {renderSortIcon('price')}
+                    </span>
+                  </th>
+                  <th
+                    style={{ width: '150px', cursor: 'pointer', userSelect: 'none' }}
+                    onClick={() => handleSort('quantity')}
+                  >
+                    <span style={{ display: 'inline-flex', alignItems: 'center' }}>
+                      Stock {renderSortIcon('quantity')}
+                    </span>
+                  </th>
+                  <th style={{ width: '120px' }}>
+                    Action
+                  </th>
+                </tr>
+              </thead>
+              <tbody>
+                {sortedProducts.map((product) => (
+                  <tr
+                    key={product.id}
+                    className="row-interactive"
+                    onClick={() => onSelectProduct(product.id)}
+                  >
+                    <td style={{ color: 'var(--text-muted)' }} className="tabular-nums">
+                      #{product.id}
+                    </td>
+                    <td>
+                      <div className="product-name-cell">{product.name}</div>
+                      {product.description && (
+                        <div className="product-desc-muted">{product.description}</div>
+                      )}
+                    </td>
+                    <td className="text-right tabular-nums" style={{ fontWeight: 500 }}>
+                      ${parseFloat(product.price).toFixed(2)}
+                    </td>
+                    <td>
+                      {getStockBadge(product.quantity)}
+                    </td>
+                    <td onClick={(e) => e.stopPropagation()}>
+                      <button
+                        className="btn btn-secondary btn-sm"
+                        onClick={() => onRestockProduct && onRestockProduct(product.id)}
+                        disabled={restockingId === product.id}
+                        title="Add 10 units"
+                      >
+                        {restockingId === product.id ? (
+                          <RefreshCw size={12} style={{ animation: 'spin 0.7s linear infinite' }} />
+                        ) : (
+                          '+10 Restock'
+                        )}
+                      </button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
+      </div>
     </div>
   );
 }
-

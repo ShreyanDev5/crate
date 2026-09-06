@@ -1,174 +1,116 @@
-# <img src="frontend/public/favicon.svg" width="28" height="28" style="vertical-align: middle;" /> FastAPI Inventory
+# <img src="frontend/public/favicon.svg" width="24" height="24" style="vertical-align: middle;" /> Crate
 
-A full-stack inventory management web application built with FastAPI, PostgreSQL, and React. Features complete product CRUD operations, atomic restocking, automatic database seeding, and interactive Swagger API documentation.
-
-[![API Docs](https://img.shields.io/badge/API_Docs-Interactive_Swagger-009688?style=flat-square)](#api-reference)
-[![Database](https://img.shields.io/badge/Database-PostgreSQL-336791?style=flat-square&logo=postgresql&logoColor=white)](https://www.postgresql.org/)
+A minimal inventory management app and REST API built with FastAPI, PostgreSQL, and React.
 
 ---
 
 ## Preview
 
-| Home Dashboard | Product Catalog |
+| Dashboard | Inventory |
 | :---: | :---: |
-| <img src="frontend/public/home_page.png" width="380" alt="Home Dashboard" /> | <img src="frontend/public/all_product_page.png" width="380" alt="Product Catalog" /> |
-| **Product Details View** | **Add Product Form** |
-| <img src="frontend/public/product_details_card.png" width="380" alt="Product Details View" /> | <img src="frontend/public/add_product_page.png" width="380" alt="Add Product Form" /> |
+| ![Dashboard](frontend/public/home_page.png) | ![Inventory](frontend/public/all_product_page.png) |
+| **Product Details** | **Add / Edit Product** |
+| ![Product Details](frontend/public/product_details_card.png) | ![Add Product](frontend/public/add_product_page.png) |
 
 ---
 
 ## Features
 
-- **Product Lifecycle Management**: Create, view, update, and delete inventory items with real-time state synchronization.
-- **Dedicated Stock Restocking**: Adjust and increment stock levels using atomic restock endpoints.
-- **Automated Database Seeding**: Automatically initialize database schemas and populate sample catalog records on startup if tables are empty.
-- **Interactive UI Dashboard**: Monitor stock health, search products instantly, and track low-stock items.
-- **Interactive API Documentation**: Explore and execute REST endpoints directly via auto-generated Swagger UI.
+- **Dashboard Metrics**: Live overview of total products, low-stock alerts, and out-of-stock items.
+- **Product Management**: Instant search, stock status filtering, and quick in-table restocking (+10 units).
+- **Safe Session Lifecycle**: Centralized `get_db` generator with clean session teardown and startup database seeding.
+- **Interactive API Docs**: Built-in Swagger UI at `/docs` for exploring and testing endpoints.
 
 ---
 
 ## Tech Stack
 
-- **Backend**: Python 3.10+, FastAPI, SQLAlchemy, Pydantic v2, PostgreSQL (`psycopg2`), Uvicorn
-- **Frontend**: React 19, Vite, Lucide Icons, Vanilla CSS
-- **AI Tooling**: Antigravity, Cursor (Frontend)
-
----
-
-## Architecture
-
-```text
-React Frontend (Vite) ──> FastAPI Router (main.py) ──> SQLAlchemy ORM (models.py) ──> PostgreSQL Database
-```
-
-- **Router (`main.py`)**: Defines REST endpoints, validates request payloads via Pydantic schemas, and manages CORS policies.
-- **Database Engine (`database.py`)**: Configures the PostgreSQL engine and yields database sessions via FastAPI `Depends` to prevent connection leaks.
-- **Data Models (`models.py`)**: Encapsulates SQLAlchemy entity structures mapping database tables and attributes.
-- **Schemas (`schemas.py`)**: Enforces strict Pydantic v2 request serialization and response validation.
+- **Backend**: Python, FastAPI, SQLAlchemy, PostgreSQL, Pydantic v2, Uvicorn
+- **Frontend**: React 19, Vite, Lucide Icons
+- **AI Pairing**: Antigravity, Cursor
 
 ---
 
 ## API Reference
 
-Base path: `/` (Interactive documentation available at `http://localhost:8000/docs`)
+Interactive documentation available at `http://localhost:8000/docs`.
 
-| Method | Endpoint | Description | Request Format |
+| Method | Endpoint | Description | Payload |
 | :--- | :--- | :--- | :--- |
-| `GET` | `/` | Service health and connectivity check | None |
-| `GET` | `/products` | Retrieve all inventory products | None |
-| `GET` | `/products/{id}` | Retrieve product details by ID | None |
-| `POST` | `/products` | Create a new product entry (HTTP 201) | JSON (`{ name, description, price, quantity }`) |
-| `PUT` | `/products/{id}` | Update an existing product | JSON (`{ name, description, price, quantity }`) |
-| `DELETE` | `/products/{id}` | Remove a product from inventory | None |
-| `POST` | `/products/{id}/restock` | Increment product quantity | Query param `?amount=10` |
+| `GET` | `/` | Health check | — |
+| `GET` | `/products` | List all products | — |
+| `GET` | `/products/{id}` | Get product by ID | — |
+| `POST` | `/products` | Create product | `{ name, description, price, quantity }` |
+| `PUT` | `/products/{id}` | Update product | `{ name, description, price, quantity }` |
+| `DELETE` | `/products/{id}` | Delete product | — |
+| `POST` | `/products/{id}/restock` | Restock quantity (`?amount=10`) | — |
 
 ---
 
 ## Project Structure
 
 ```text
-fastapi-inventory/
+crate/
 ├── backend/
-│   ├── .env.example       # Example PostgreSQL connection string
-│   ├── database.py        # Database engine, sessionmaker & get_db generator
-│   ├── main.py            # FastAPI application routes, CORS & startup seeding
-│   ├── models.py          # SQLAlchemy Product database model
-│   └── schemas.py         # Pydantic v2 request and response schemas
+│   ├── database.py        # PostgreSQL engine & get_db generator
+│   ├── main.py            # API routes, CORS & seed data
+│   ├── models.py          # SQLAlchemy models
+│   └── schemas.py         # Pydantic schemas
 ├── frontend/
-│   ├── public/            # Static assets and screenshot previews
 │   ├── src/
-│   │   ├── components/    # Reusable React UI views and forms
+│   │   ├── components/    # Views and modals (Dashboard, Inventory, Detail, Form)
 │   │   ├── services/      # API client functions
-│   │   ├── App.jsx        # Root application layout and routing
-│   │   ├── index.css      # Core styles and design tokens
-│   │   └── main.jsx       # React application entry point
-│   ├── index.html         # HTML root document
-│   ├── package.json       # Frontend package configuration
-│   └── vite.config.js     # Vite bundler configuration
-└── README.md              # Project documentation
+│   │   ├── App.jsx        # Layout, navigation, and state
+│   │   └── index.css      # Design tokens & styles
+│   └── index.html
+└── README.md
 ```
 
 ---
 
 ## Getting Started
 
-### Prerequisites
+### 1. Database
 
-- **Python**: `3.10+`
-- **Node.js**: `18.0+` & `npm`
-- **PostgreSQL**: `14+` running locally
-
-### 1. Database & Environment Setup
-
-Create the PostgreSQL database:
+Create a PostgreSQL database:
 ```sql
 CREATE DATABASE inventory_db;
 ```
 
-Copy the environment file:
-- **PowerShell (Windows)**:
-  ```powershell
-  Copy-Item backend\.env.example backend\.env
-  ```
-- **CMD (Windows)**:
-  ```cmd
-  copy backend\.env.example backend\.env
-  ```
-- **Unix / macOS**:
-  ```bash
-  cp backend/.env.example backend/.env
-  ```
-
-Set your PostgreSQL connection string in `backend/.env`:
+Copy `backend/.env.example` to `backend/.env` and update your connection string:
 ```env
 DATABASE_URL=postgresql://postgres:your_password@localhost:5432/inventory_db
 ```
 
-### 2. Backend Setup
+### 2. Backend
 
-- **PowerShell (Windows)**:
-  ```powershell
-  python -m venv .venv
-  .venv\Scripts\Activate.ps1
-  cd backend
-  pip install fastapi uvicorn sqlalchemy psycopg2-binary pydantic python-dotenv
-  uvicorn main:app --reload
-  ```
-- **CMD (Windows)**:
-  ```cmd
-  python -m venv .venv
-  .venv\Scripts\activate.bat
-  cd backend
-  pip install fastapi uvicorn sqlalchemy psycopg2-binary pydantic python-dotenv
-  uvicorn main:app --reload
-  ```
-- **Unix / macOS**:
-  ```bash
-  python3 -m venv .venv
-  source .venv/bin/activate
-  cd backend
-  pip install fastapi uvicorn sqlalchemy psycopg2-binary pydantic python-dotenv
-  uvicorn main:app --reload
-  ```
+```bash
+cd backend
+python -m venv .venv
 
-*API Documentation: `http://localhost:8000/docs`*
+# Activate virtual environment:
+# Windows: .venv\Scripts\activate
+# macOS/Linux: source .venv/bin/activate
 
-### 3. Frontend Setup
+pip install fastapi uvicorn sqlalchemy psycopg2-binary pydantic python-dotenv
+uvicorn main:app --reload
+```
+API runs at `http://localhost:8000` (docs at `http://localhost:8000/docs`).
 
-- **All Platforms**:
-  ```bash
-  cd frontend
-  npm install
-  npm run dev
-  ```
+### 3. Frontend
 
-*Web Application: `http://localhost:5173`*
+```bash
+cd frontend
+npm install
+npm run dev
+```
+App runs at `http://localhost:5173`.
 
 ---
 
 ## Author
 
 **Shreyan Sardar**
-- **Portfolio**: [shreyandev.vercel.app](https://shreyandev.vercel.app)
-- **GitHub**: [@ShreyanDev5](https://github.com/ShreyanDev5)
-- **LinkedIn**: [shreyansardar](https://www.linkedin.com/in/shreyansardar/)
+- Portfolio: [shreyandev.vercel.app](https://shreyandev.vercel.app)
+- GitHub: [@ShreyanDev5](https://github.com/ShreyanDev5)
+- LinkedIn: [shreyansardar](https://www.linkedin.com/in/shreyansardar/)

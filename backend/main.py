@@ -5,7 +5,7 @@ import models
 from schemas import Product
 from fastapi.middleware.cors import CORSMiddleware
 
-app = FastAPI()
+app = FastAPI(title="Crate")
 
 origins = [
     "http://localhost:5173",
@@ -79,7 +79,7 @@ seed_db()
 # Root endpoint
 @app.get("/")
 def greet():
-    return {"message": "Welcome to the FastAPI Inventory"}
+    return {"message": "Welcome to Crate"}
 
 
 # Get all products
