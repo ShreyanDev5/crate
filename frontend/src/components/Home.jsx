@@ -1,5 +1,5 @@
 import React from 'react';
-import { Package, RefreshCw } from 'lucide-react';
+import { Package, RefreshCw, AlertTriangle, AlertCircle } from 'lucide-react';
 
 export default function Home({ products, loading, onViewChange, onSelectProduct, onRestockProduct, restockingId }) {
   if (loading && products.length === 0) {
@@ -30,6 +30,7 @@ export default function Home({ products, loading, onViewChange, onSelectProduct,
         <div className="stat-card" onClick={() => onViewChange('inventory', 'all')}>
           <div className="stat-header">
             <span className="stat-label">Total Products</span>
+            <Package size={16} style={{ color: 'var(--text-muted)' }} />
           </div>
           <div className="stat-value tabular-nums">{totalProducts}</div>
         </div>
@@ -37,7 +38,7 @@ export default function Home({ products, loading, onViewChange, onSelectProduct,
         <div className="stat-card" onClick={() => onViewChange('inventory', 'low')}>
           <div className="stat-header">
             <span className="stat-label">Low Stock</span>
-            <span className="stat-dot" style={{ background: 'var(--warning)' }}></span>
+            <AlertTriangle size={16} style={{ color: lowStockCount > 0 ? 'var(--warning)' : 'var(--text-muted)' }} />
           </div>
           <div className="stat-value tabular-nums" style={{ color: lowStockCount > 0 ? 'var(--warning)' : 'inherit' }}>
             {lowStockCount}
@@ -47,7 +48,7 @@ export default function Home({ products, loading, onViewChange, onSelectProduct,
         <div className="stat-card" onClick={() => onViewChange('inventory', 'out')}>
           <div className="stat-header">
             <span className="stat-label">Out of Stock</span>
-            <span className="stat-dot" style={{ background: 'var(--danger)' }}></span>
+            <AlertCircle size={16} style={{ color: outOfStockCount > 0 ? 'var(--danger)' : 'var(--text-muted)' }} />
           </div>
           <div className="stat-value tabular-nums" style={{ color: outOfStockCount > 0 ? 'var(--danger)' : 'inherit' }}>
             {outOfStockCount}
@@ -75,7 +76,7 @@ export default function Home({ products, loading, onViewChange, onSelectProduct,
                 <tr>
                   <th style={{ width: '80px' }}>ID</th>
                   <th>Product</th>
-                  <th style={{ width: '120px' }} className="text-right">Price</th>
+                  <th style={{ width: '120px' }}>Price</th>
                   <th style={{ width: '150px' }}>Stock</th>
                   <th style={{ width: '120px' }}>Action</th>
                 </tr>
@@ -100,7 +101,7 @@ export default function Home({ products, loading, onViewChange, onSelectProduct,
                           <div className="product-desc-muted">{product.description}</div>
                         )}
                       </td>
-                      <td className="text-right tabular-nums" style={{ fontWeight: 500 }}>
+                      <td className="tabular-nums" style={{ fontWeight: 500 }}>
                         ${parseFloat(product.price).toFixed(2)}
                       </td>
                       <td>

@@ -141,9 +141,7 @@ export default function ProductList({ products, loading, onSelectProduct, onOpen
             <Package size={28} style={{ color: 'var(--text-muted)' }} />
             <p className="state-title">No products found</p>
             <p className="state-subtitle">
-              {products.length === 0
-                ? 'No products added yet.'
-                : 'No products match your search.'}
+              {products.length === 0 ? 'No products added yet.' : 'No products match your search.'}
             </p>
             {products.length === 0 && (
               <button className="btn btn-primary btn-sm" style={{ marginTop: '0.75rem' }} onClick={onOpenCreate}>
@@ -174,10 +172,9 @@ export default function ProductList({ products, loading, onSelectProduct, onOpen
                   </th>
                   <th
                     style={{ width: '120px', cursor: 'pointer', userSelect: 'none' }}
-                    className="text-right"
                     onClick={() => handleSort('price')}
                   >
-                    <span style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'flex-end', width: '100%' }}>
+                    <span style={{ display: 'inline-flex', alignItems: 'center' }}>
                       Price {renderSortIcon('price')}
                     </span>
                   </th>
@@ -210,7 +207,7 @@ export default function ProductList({ products, loading, onSelectProduct, onOpen
                         <div className="product-desc-muted">{product.description}</div>
                       )}
                     </td>
-                    <td className="text-right tabular-nums" style={{ fontWeight: 500 }}>
+                    <td className="tabular-nums" style={{ fontWeight: 500 }}>
                       ${parseFloat(product.price).toFixed(2)}
                     </td>
                     <td>

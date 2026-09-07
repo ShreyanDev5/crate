@@ -427,6 +427,14 @@ input[type=number] {
   color: var(--text-secondary);
 }
 
+.stat-header svg {
+  transition: opacity var(--transition-fast);
+}
+
+.stat-card:hover .stat-header svg {
+  opacity: 0.9;
+}
+
 .stat-dot {
   width: 7px;
   height: 7px;
@@ -489,6 +497,7 @@ input[type=number] {
   color: var(--text-muted);
   border-bottom: 1px solid var(--border-subtle);
   background: rgba(0, 0, 0, 0.2);
+  text-align: left;
   transition: color var(--transition-fast);
 }
 
@@ -918,19 +927,25 @@ input[type=number] {
   justify-content: center;
   padding: 3.5rem 1.5rem;
   text-align: center;
-  gap: 0.5rem;
+  gap: 0.35rem;
 }
 
 .state-title {
   font-size: 0.925rem;
   font-weight: 600;
   color: var(--text-primary);
+  text-align: center;
+  line-height: 1.3;
+  margin: 0;
 }
 
 .state-subtitle {
   font-size: 0.8rem;
   color: var(--text-secondary);
-  max-width: 320px;
+  max-width: 340px;
+  text-align: center;
+  line-height: 1.4;
+  margin: 0 auto;
 }
 
 .spinner {
