@@ -1,4 +1,4 @@
-# <img src="frontend/public/favicon.svg" width="24" height="24" style="vertical-align: middle;" /> Crate
+# Crate
 
 A minimal inventory management app and REST API built with FastAPI, PostgreSQL, and React.
 
@@ -6,11 +6,17 @@ A minimal inventory management app and REST API built with FastAPI, PostgreSQL, 
 
 ## Preview
 
-| Dashboard | Inventory |
-| :---: | :---: |
-| ![Dashboard](frontend/public/home_page.png) | ![Inventory](frontend/public/all_product_page.png) |
-| **Product Details** | **Add / Edit Product** |
-| ![Product Details](frontend/public/product_details_card.png) | ![Add Product](frontend/public/add_product_page.png) |
+### Dashboard
+![Dashboard](frontend/public/home_page.png)
+
+### Inventory
+![Inventory](frontend/public/all_product_page.png)
+
+### Product Details
+![Product Details](frontend/public/product_details_card.png)
+
+### Add / Edit Product
+![Add / Edit Product](frontend/public/add_product_page.png)
 
 ---
 
@@ -35,36 +41,15 @@ A minimal inventory management app and REST API built with FastAPI, PostgreSQL, 
 
 Interactive documentation available at `http://localhost:8000/docs`.
 
-| Method | Endpoint | Description | Payload |
-| :--- | :--- | :--- | :--- |
-| `GET` | `/` | Health check | — |
-| `GET` | `/products` | List all products | — |
-| `GET` | `/products/{id}` | Get product by ID | — |
-| `POST` | `/products` | Create product | `{ name, description, price, quantity }` |
-| `PUT` | `/products/{id}` | Update product | `{ name, description, price, quantity }` |
-| `DELETE` | `/products/{id}` | Delete product | — |
-| `POST` | `/products/{id}/restock` | Restock quantity (`?amount=10`) | — |
-
----
-
-## Project Structure
-
-```text
-crate/
-├── backend/
-│   ├── database.py        # PostgreSQL engine & get_db generator
-│   ├── main.py            # API routes, CORS & seed data
-│   ├── models.py          # SQLAlchemy models
-│   └── schemas.py         # Pydantic schemas
-├── frontend/
-│   ├── src/
-│   │   ├── components/    # Views and modals (Dashboard, Inventory, Detail, Form)
-│   │   ├── services/      # API client functions
-│   │   ├── App.jsx        # Layout, navigation, and state
-│   │   └── index.css      # Design tokens & styles
-│   └── index.html
-└── README.md
-```
+| Method | Endpoint | Description |
+| :--- | :--- | :--- |
+| `GET` | `/` | Health check |
+| `GET` | `/products` | List all products |
+| `GET` | `/products/{id}` | Get product by ID |
+| `POST` | `/products` | Create product |
+| `PUT` | `/products/{id}` | Update product |
+| `DELETE` | `/products/{id}` | Delete product |
+| `POST` | `/products/{id}/restock?amount=10` | Restock product quantity |
 
 ---
 
@@ -77,7 +62,7 @@ Create a PostgreSQL database:
 CREATE DATABASE inventory_db;
 ```
 
-Copy `backend/.env.example` to `backend/.env` and update your connection string:
+Configure `backend/.env` (refer to `backend/.env.example`):
 ```env
 DATABASE_URL=postgresql://postgres:your_password@localhost:5432/inventory_db
 ```
@@ -87,11 +72,7 @@ DATABASE_URL=postgresql://postgres:your_password@localhost:5432/inventory_db
 ```bash
 cd backend
 python -m venv .venv
-
-# Activate virtual environment:
-# Windows: .venv\Scripts\activate
-# macOS/Linux: source .venv/bin/activate
-
+source .venv/bin/activate  # Windows: .venv\Scripts\activate
 pip install fastapi uvicorn sqlalchemy psycopg2-binary pydantic python-dotenv
 uvicorn main:app --reload
 ```
@@ -110,7 +91,4 @@ App runs at `http://localhost:5173`.
 
 ## Author
 
-**Shreyan Sardar**
-- Portfolio: [shreyandev.vercel.app](https://shreyandev.vercel.app)
-- GitHub: [@ShreyanDev5](https://github.com/ShreyanDev5)
-- LinkedIn: [shreyansardar](https://www.linkedin.com/in/shreyansardar/)
+**Shreyan Sardar** — [Portfolio](https://shreyandev.vercel.app) · [GitHub](https://github.com/ShreyanDev5) · [LinkedIn](https://www.linkedin.com/in/shreyansardar/)
