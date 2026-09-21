@@ -1,10 +1,8 @@
 # Crate
 
-A minimal inventory management app and REST API built with FastAPI, PostgreSQL, and React.
+> A minimal inventory management app and REST API built with FastAPI, PostgreSQL, and React.
 
 ---
-
-## Preview
 
 ### Dashboard
 ![Dashboard](frontend/public/home_page.png)
