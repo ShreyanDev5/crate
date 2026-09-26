@@ -31,7 +31,6 @@
 
 - **Backend**: Python, FastAPI, SQLAlchemy, PostgreSQL, Pydantic v2, Uvicorn
 - **Frontend**: React 19, Vite, Lucide Icons
-- **AI Pairing**: Antigravity, Cursor
 
 ---
 
