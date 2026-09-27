@@ -62,20 +62,20 @@ export default function ProductList({ products, loading, onSelectProduct, onOpen
     if (quantity === 0) {
       return (
         <span className="badge badge-danger tabular-nums">
-          <span className="badge-dot"></span> Out of stock
+          Out of stock
         </span>
       );
     }
     if (quantity <= 10) {
       return (
         <span className="badge badge-warning tabular-nums">
-          <span className="badge-dot"></span> {quantity} left
+          {quantity} left
         </span>
       );
     }
     return (
       <span className="badge badge-success tabular-nums">
-        <span className="badge-dot"></span> {quantity} in stock
+        {quantity} in stock
       </span>
     );
   };

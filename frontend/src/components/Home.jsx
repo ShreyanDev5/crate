@@ -59,7 +59,7 @@ export default function Home({ products, loading, onViewChange, onSelectProduct,
       {/* Attention Table */}
       <div className="card">
         <div className="card-header">
-          <h2 className="card-title">Low Stock Items</h2>
+          <h2 className="card-title">Stock Alerts</h2>
           <span className="badge badge-neutral tabular-nums">{attentionItems.length} items</span>
         </div>
 
@@ -106,7 +106,6 @@ export default function Home({ products, loading, onViewChange, onSelectProduct,
                       </td>
                       <td>
                         <span className={`badge ${isOut ? 'badge-danger' : 'badge-warning'} tabular-nums`}>
-                          <span className="badge-dot"></span>
                           {isOut ? 'Out of stock' : `${product.quantity} left`}
                         </span>
                       </td>

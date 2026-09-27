@@ -44,21 +44,21 @@ export default function ProductDetail({ productId, onClose, onEdit, onProductDel
   const getStockBadge = (quantity) => {
     if (quantity === 0) {
       return (
-        <span className="badge badge-danger">
-          <span className="badge-dot"></span> Out of stock
+        <span className="badge badge-danger tabular-nums">
+          Out of stock
         </span>
       );
     }
     if (quantity <= 10) {
       return (
-        <span className="badge badge-warning">
-          <span className="badge-dot"></span> Low stock ({quantity})
+        <span className="badge badge-warning tabular-nums">
+          Low stock ({quantity})
         </span>
       );
     }
     return (
-      <span className="badge badge-success">
-        <span className="badge-dot"></span> In stock ({quantity})
+      <span className="badge badge-success tabular-nums">
+        In stock ({quantity})
       </span>
     );
   };
@@ -67,10 +67,7 @@ export default function ProductDetail({ productId, onClose, onEdit, onProductDel
     <div className="modal-backdrop" onClick={onClose}>
       <div className="modal-card" onClick={(e) => e.stopPropagation()}>
         <div className="modal-header">
-          <div className="modal-title-group">
-            <span className="badge badge-neutral tabular-nums">#{productId}</span>
-            <h3 className="modal-title">Product Details</h3>
-          </div>
+          <h3 className="modal-title">Product Details</h3>
           <button className="modal-close-btn" onClick={onClose} aria-label="Close">
             <X size={15} />
           </button>
@@ -87,11 +84,14 @@ export default function ProductDetail({ productId, onClose, onEdit, onProductDel
             </div>
           ) : product ? (
             <div className="detail-meta-list">
-              {/* Product title with Stock badge aligned right in a single row */}
+              {/* Product title with ID and Stock badge aligned right in a single row */}
               <div className="detail-header-row">
-                <h2 style={{ fontSize: '1.15rem', fontWeight: 600, letterSpacing: '-0.02em' }}>
-                  {product.name}
-                </h2>
+                <div className="detail-title-group">
+                  <h2 className="detail-title">
+                    {product.name}
+                  </h2>
+                  <span className="badge badge-neutral tabular-nums">#{product.id}</span>
+                </div>
                 <div>
                   {getStockBadge(product.quantity)}
                 </div>
@@ -112,7 +112,11 @@ export default function ProductDetail({ productId, onClose, onEdit, onProductDel
               <div>
                 <div className="detail-desc-label">Description</div>
                 <div className="detail-desc-content">
-                  {product.description || 'No description.'}
+                  {product.description ? (
+                    product.description
+                  ) : (
+                    <span style={{ color: 'var(--text-muted)', fontStyle: 'italic' }}>No description.</span>
+                  )}
                 </div>
               </div>
             </div>
@@ -125,7 +129,7 @@ export default function ProductDetail({ productId, onClose, onEdit, onProductDel
               <Trash2 size={13} />
               {deleting ? 'Deleting...' : 'Delete'}
             </button>
-            <button className="btn btn-secondary btn-sm" onClick={() => onEdit(product)}>
+            <button className="btn btn-primary btn-sm" onClick={() => onEdit(product)}>
               <Edit3 size={13} />
               Edit
             </button>
