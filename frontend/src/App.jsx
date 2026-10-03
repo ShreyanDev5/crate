@@ -228,7 +228,7 @@ export default function App() {
             </a>
             <span className="footer-slash">/</span>
             <a
-              href="https://github.com/ShreyanDev5/crate"
+              href="https://github.com/shreyansr01/crate"
               target="_blank"
               rel="noreferrer"
               className="footer-link"
